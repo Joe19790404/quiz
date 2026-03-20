@@ -1,1 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>绘画宇宙生存报告 - 趣味测试</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fafafa;
+            background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+            margin: 0;
+            padding: 0;
+        }
+        .paper-texture {
+            background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+        }
+        /* Simple fade animation */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .choice-btn:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div style="display: flex; align-items: center; justify-content: center; height: 100vh; color: #888;">
+            正在加载测试...
+        </div>
+    </div>
 
+    <script type="text/babel">
+        const { useState, useMemo, useEffect } = React;
+
+        const Icons = {
+            Pencil: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+            ),
+            ArrowRight: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            ),
+            ShieldCheck: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            ),
+            Palette: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.688-1.688h1.954c3.151 0 5.586-2.572 5.586-5.586 0-4.992-4.447-8.789-10-8.789Z"/></svg>
+            ),
+            Zap: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M4 14.5 14 3l-2.5 8.5H20L10 21l2.5-8.5H4z"/></svg>
+            ),
+            Ghost: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M9 10h.01"/><path d="M15 10h.01"/><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 18.5l3 3.5V10a8 8 0 0 0-8-8z"/></svg>
+            ),
+            Target: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            ),
+            RotateCcw: ({ className }) => (
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            )
+        };
+
+        const QUESTIONS = [
+            {
+                id: 1,
+                text: "你一睁眼，发现自己掉进了一个全白的虚无空间。系统提示：请在10秒内给你的角色画一把武器防身。你的第一反应是？",
+                options: [
+                    { id: 'A', text: "仔细构思一把带有繁复花纹和背景故事的专属神器，线稿必须完美。" },
+                    { id: 'B', text: "给我的角色画一根火柴棍当金箍棒，极简主义才是王道。" },
+                    { id: 'C', text: "迅速画一块线条狂乱的巨大板砖，简单粗暴杀伤力强。" },
+                    { id: 'D', text: "完蛋了，10秒我连个头都画不完，武器还没拿到手就先领盒饭了。" },
+                ]
+            },
+            {
+                id: 2,
+                text: "突然重力消失，你开始逐渐升空。如果要画出这个状态，你会怎么处理自己的衣服和头发？",
+                options: [
+                    { id: 'A', text: "找参考图，严格按照物理学和解剖学，画出完美的失重飘逸感。" },
+                    { id: 'B', text: "根本没影响，我平时画的角色本来就是光头且没穿外套的火柴人。" },
+                    { id: 'C', text: "随便画几条疯狂颤抖的波浪线，表示“风好大我好害怕”。" },
+                    { id: 'D', text: "先把角色画成一个圆球，反正飘在空中都一样，具体细节下次再说。" },
+                ]
+            },
+            {
+                id: 3,
+                text: "一只由无数根杂乱线条组成的“未完成草稿怪兽”向你扑来，它的怨气极大。面对它，你的对策是？",
+                options: [
+                    { id: 'A', text: "掏出画笔，现场给怪兽勾线、上色、打光，用成图超度它！" },
+                    { id: 'B', text: "飞速在怪兽外面画个正方形笼子把它关起来。" },
+                    { id: 'C', text: "迎难而上！用我更乱的草稿线条把它缠住！" },
+                    { id: 'D', text: "产生共鸣，脑子里回忆起自己的无数草稿。" },
+                ]
+            },
+            {
+                id: 4,
+                text: "你的角色逃到了一个安全屋门前，但门禁需要生物识别：系统要求你画出一只“完美的手”才能开门。此时你会？",
+                options: [
+                    { id: 'A', text: "调出精准的人体参考，死磕骨骼结构画出一只完美的手。" },
+                    { id: 'B', text: "直接给角色画一个圆圆的哆啦A梦手糊弄过去。" },
+                    { id: 'C', text: "颤抖着画出五根像胡萝卜一样的香肠手指。" },
+                    { id: 'D', text: "耍小聪明，把手画在角色的口袋。薛定谔的手就是最完美的手。" },
+                ]
+            }
+        ];
+
+        const RESULTS = {
+            B: {
+                title: "极简行者",
+                survivalRate: "99%",
+                comment: "你是天生的多重宇宙旅行者！你从不内耗，深谙“只要线条够简单，困难就追不上我”的真理。哪怕是画个圈，你都能用来当盾牌。",
+                cta: "“亡命之徒：多重宇宙”线上挑战赛正在招募！这里不需要神仙画技，只要你敢用画笔闯荡8个未知宇宙。完成2个月挑战，99元报名费全额返还，还能瓜分奖金池！",
+                icon: "ShieldCheck",
+                color: "bg-emerald-50 text-emerald-700 border-emerald-200"
+            },
+            A: {
+                title: "细节狂魔",
+                survivalRate: "30%",
+                comment: "哎呀！你的画技很好，但太执着于细节了。过度追求完美会让你在快节奏的危机中寸步难行！",
+                cta: "你需要一场特训来打破你的“完美主义拖延症”！带上你的OC/同人角色，知名漫画家东叔亲自带队，用2个月的趣味打卡治好你的完美主义。全勤通关不仅返还报名费，还能瓜分失败者的奖金，拿到东叔亲绘角色大合照！",
+                icon: "Palette",
+                color: "bg-blue-50 text-blue-700 border-blue-200"
+            },
+            C: {
+                title: "抽象大神",
+                survivalRate: "200%",
+                comment: "多重宇宙的怪物看到你都得绕道走！你的脑洞和画风一样狂野！",
+                cta: "“亡命之徒：多重宇宙” 需要你这样不按套路出牌的狠角色。创造你的分身，和我们一起穿梭8个奇葩宇宙。全勤通过挑战即可拿回全额报名费+瓜分奖金！",
+                icon: "Zap",
+                color: "bg-orange-50 text-orange-700 border-orange-200"
+            },
+            D: {
+                title: "鸽子星人",
+                survivalRate: "10%",
+                comment: "你的脑洞很大，但你的行动力太弱啦！脑子里有稀奇古怪的想法却迟迟没有落实！",
+                cta: "不能再咕咕咕了！系统强制拉你入伙！快来加入 “亡命之徒：多重宇宙”，设定好你的专属角色，用真金白银（99元）和丰富奖励逼自己一把。游戏管理员全程监督，战友互相打气，2个月带你彻底告别“草稿吃灰”。",
+                icon: "Ghost",
+                color: "bg-purple-50 text-purple-700 border-purple-200"
+            }
+        };
+
+        function App() {
+            const [step, setStep] = useState('welcome');
+            const [currentIdx, setCurrentIdx] = useState(0);
+            const [answers, setAnswers] = useState([]);
+
+            const handleStart = () => {
+                setAnswers([]);
+                setCurrentIdx(0);
+                setStep('quiz');
+            };
+
+            const handleAnswer = (choice) => {
+                const newAnswers = [...answers, choice];
+                setAnswers(newAnswers);
+                if (currentIdx < QUESTIONS.length - 1) {
+                    setCurrentIdx(currentIdx + 1);
+                } else {
+                    setStep('result');
+                }
+            };
+
+            const finalResult = useMemo(() => {
+                if (answers.length === 0) return RESULTS.B;
+                const counts = { A: 0, B: 0, C: 0, D: 0 };
+                answers.forEach(a => counts[a]++);
+                
+                let maxChoice = 'B';
+                let maxCount = -1;
+                
+                ['A', 'B', 'C', 'D'].forEach(choice => {
+                    if (counts[choice] > maxCount) {
+                        maxCount = counts[choice];
+                        maxChoice = choice;
+                    }
+                });
+                
+                return RESULTS[maxChoice];
+            }, [answers]);
+
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 overflow-x-hidden paper-texture">
+                    <div className="w-full max-w-2xl">
+                        {step === 'welcome' && (
+                            <div className="text-center space-y-6 sm:space-y-8 py-10 fade-in">
+                                <div className="inline-block p-4 rounded-full bg-black text-white mb-2 sm:mb-4">
+                                    <Icons.Pencil className="w-6 h-6 sm:w-8 sm:h-8" />
+                                </div>
+                                <h1 className="text-4xl sm:text-6xl font-bold tracking-tighter leading-tight">
+                                    绘画宇宙<br />生存报告
+                                </h1>
+                                <p className="text-zinc-500 text-base sm:text-lg max-w-xs sm:max-w-md mx-auto leading-relaxed px-4">
+                                    当你的画笔成为唯一的生存工具，你能在多重宇宙中活多久？
+                                </p>
+                                <div className="pt-4">
+                                    <button
+                                        onClick={handleStart}
+                                        className="group relative inline-flex items-center gap-2 px-8 py-4 bg-black text-white rounded-full font-medium transition-all hover:scale-105 active:scale-95 w-full sm:w-auto justify-center"
+                                    >
+                                        开始测试
+                                        <Icons.ArrowRight className="w-4 h-4 ml-1" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 'quiz' && (
+                            <div className="space-y-6 sm:space-y-8 py-4 fade-in">
+                                <div className="flex items-center justify-between text-[10px] sm:text-xs font-mono uppercase tracking-widest text-zinc-400">
+                                    <span>Question {currentIdx + 1} / {QUESTIONS.length}</span>
+                                    <div className="w-24 sm:w-32 h-1 bg-zinc-200 rounded-full overflow-hidden">
+                                        <div 
+                                            className="h-full bg-black transition-all duration-300"
+                                            style={{ width: `${((currentIdx + 1) / QUESTIONS.length) * 100}%` }}
+                                        ></div>
+                                    </div>
+                                </div>
+                                
+                                <h2 className="text-xl sm:text-2xl font-semibold leading-snug px-1">
+                                    {QUESTIONS[currentIdx].text}
+                                </h2>
+
+                                <div className="grid gap-3 sm:gap-4">
+                                    {QUESTIONS[currentIdx].options.map((opt) => (
+                                        <button
+                                            key={opt.id}
+                                            onClick={() => handleAnswer(opt.id)}
+                                            className="choice-btn group text-left p-4 sm:p-6 border border-zinc-200 rounded-2xl hover:border-black hover:bg-zinc-50 transition-all bg-white/50"
+                                        >
+                                            <div className="flex gap-3 sm:gap-4">
+                                                <span className="font-mono text-zinc-400 group-hover:text-black shrink-0">{opt.id}.</span>
+                                                <span className="text-zinc-700 group-hover:text-black text-sm sm:text-base leading-relaxed">{opt.text}</span>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 'result' && (
+                            <div className="space-y-6 sm:space-y-8 py-4 fade-in">
+                                <div className={`p-6 sm:p-8 rounded-3xl border ${finalResult.color} space-y-4 sm:space-y-6`}>
+                                    <div className="flex items-start justify-between">
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] sm:text-xs font-mono uppercase tracking-widest opacity-70">Survival Report</p>
+                                            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">{finalResult.title}</h2>
+                                        </div>
+                                        <div className="p-2 sm:p-3 rounded-2xl bg-white/50 backdrop-blur-sm shrink-0">
+                                            {React.createElement(Icons[finalResult.icon], { className: "w-8 h-8 sm:w-12 sm:h-12" })}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <p className="text-xs font-medium opacity-70">生存率</p>
+                                        <p className="text-5xl sm:text-6xl font-black tracking-tighter">{finalResult.survivalRate}</p>
+                                    </div>
+
+                                    <div className="pt-4 sm:pt-6 border-t border-current/10">
+                                        <p className="text-base sm:text-lg leading-relaxed font-medium">
+                                            {finalResult.comment}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="p-6 sm:p-8 bg-white border border-zinc-200 rounded-3xl space-y-4 shadow-sm">
+                                    <div className="flex items-center gap-2 text-zinc-400">
+                                        <Icons.Target className="w-4 h-4" />
+                                        <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest">Action Call</span>
+                                    </div>
+                                    <p className="text-zinc-600 text-sm sm:text-base leading-relaxed">
+                                        {finalResult.cta}
+                                    </p>
+                                    <button 
+                                        className="w-full py-4 bg-zinc-900 text-white rounded-2xl font-medium hover:bg-black transition-colors active:scale-95"
+                                        onClick={() => window.open('https://example.com', '_blank')}
+                                    >
+                                        立即加入挑战
+                                    </button>
+                                </div>
+
+                                <button
+                                    onClick={() => setStep('welcome')}
+                                    className="w-full flex items-center justify-center gap-2 py-4 text-zinc-400 hover:text-black transition-colors font-medium text-sm"
+                                >
+                                    <Icons.RotateCcw className="w-4 h-4" />
+                                    重新测试
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Wait for everything to load
+        window.addEventListener('load', () => {
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(<App />);
+        });
+    </script>
+</body>
+</html>
